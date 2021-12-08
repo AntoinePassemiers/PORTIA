@@ -132,7 +132,7 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, verbos
     elif method == Method.END_TO_END:
         if np.sum(mask) > 1:
             _X_transformed = _X
-            from portia.end_to_end import apply_optimal_transform
+            from grnportia.end_to_end import apply_optimal_transform
             _X_transformed[:, mask] = apply_optimal_transform(
                 _X[:, mask], aweights=weights, _lambda=_lambda, verbose=verbose)
         else:
