@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from sklearn.preprocessing import PowerTransformer
 
-from grnportia.optim import LocalConvergence
+from portia.optim import LocalConvergence
 
 
 def cov(X, ddof=0, aweights=None):

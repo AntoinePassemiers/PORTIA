@@ -8,10 +8,10 @@ import numpy as np
 import scipy.spatial
 from sklearn.preprocessing import PowerTransformer, StandardScaler
 
-from grnportia.correction import apply_correction
-from grnportia.dataset import GeneExpressionDataset
-from grnportia.exceptions import *
-from grnportia.la import partial_inv
+from portia.correction import apply_correction
+from portia.dataset import GeneExpressionDataset
+from portia.exceptions import *
+from portia.la import partial_inv
 
 
 class Method(enum.Enum):
@@ -132,7 +132,7 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, verbos
     elif method == Method.END_TO_END:
         if np.sum(mask) > 1:
             _X_transformed = _X
-            from grnportia.end_to_end import apply_optimal_transform
+            from portia.end_to_end import apply_optimal_transform
             _X_transformed[:, mask] = apply_optimal_transform(
                 _X[:, mask], aweights=weights, _lambda=_lambda, verbose=verbose)
         else:

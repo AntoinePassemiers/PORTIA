@@ -5,38 +5,38 @@
 import numpy as np
 import pytest
 
-import grnportia
-from grnportia.core import partial_inv, rank_scores
+import portia
+from portia.core import partial_inv, rank_scores
 
 
 def test_run():
-    dataset = grnportia.GeneExpressionDataset()
-    dataset.add(grnportia.Experiment(0, [4.1, 0.2, 0, 3.4], knockout=[2]))
-    dataset.add(grnportia.Experiment(1, [2.3, 0.25, 0.1, 2.1]))
-    dataset.add(grnportia.Experiment(2, [6.1, 3.2, 0.003, 3.1]))
+    dataset = portia.GeneExpressionDataset()
+    dataset.add(portia.Experiment(0, [4.1, 0.2, 0, 3.4], knockout=[2]))
+    dataset.add(portia.Experiment(1, [2.3, 0.25, 0.1, 2.1]))
+    dataset.add(portia.Experiment(2, [6.1, 3.2, 0.003, 3.1]))
 
-    scores = grnportia.run(dataset, tf_idx=None, method='fast', verbose=False)
+    scores = portia.run(dataset, tf_idx=None, method='fast', verbose=False)
     assert not np.any(np.isnan(scores))
     assert np.all(np.logical_and(scores >= 0, scores <= 1))
     assert len(np.unique(scores)) > 1
 
-    scores = grnportia.run(dataset, tf_idx=None, method='end-to-end', verbose=False)
+    scores = portia.run(dataset, tf_idx=None, method='end-to-end', verbose=False)
     assert not np.any(np.isnan(scores))
     assert np.all(np.logical_and(scores >= 0, scores <= 1))
     assert len(np.unique(scores)) > 1
 
 
 def test_numerical_stability():
-    dataset = grnportia.GeneExpressionDataset()
-    dataset.add(grnportia.Experiment(0, [3, 3, 3, 3]))
-    dataset.add(grnportia.Experiment(1, [3, 3, 3, 3]))
-    dataset.add(grnportia.Experiment(2, [3, 3, 3, 3]))
+    dataset = portia.GeneExpressionDataset()
+    dataset.add(portia.Experiment(0, [3, 3, 3, 3]))
+    dataset.add(portia.Experiment(1, [3, 3, 3, 3]))
+    dataset.add(portia.Experiment(2, [3, 3, 3, 3]))
 
-    scores = grnportia.run(dataset, tf_idx=None, method='fast', verbose=False)
+    scores = portia.run(dataset, tf_idx=None, method='fast', verbose=False)
     assert not np.any(np.isnan(scores))
     assert np.all(np.logical_and(scores >= 0, scores <= 1))
 
-    scores = grnportia.run(dataset, tf_idx=None, method='end-to-end', verbose=False)
+    scores = portia.run(dataset, tf_idx=None, method='end-to-end', verbose=False)
     assert not np.any(np.isnan(scores))
     assert np.all(np.logical_and(scores >= 0, scores <= 1))
 

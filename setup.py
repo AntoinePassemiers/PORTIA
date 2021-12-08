@@ -6,16 +6,16 @@ from setuptools import setup
 
 
 packages = [
-    'grnportia',
-    'grnportia.optim'
+    'portia',
+    'portia.optim'
 ]
 
 with open('README.md', 'r') as f:
     long_description = f.read()
 
 setup(
-    name='grnportia',
-    version='0.0.1',
+    name='portia-grn',
+    version='0.0.2',
     author='Antoine Passemiers',
     author_email='antoine.passemiers@kuleuven.be',
     packages=packages,

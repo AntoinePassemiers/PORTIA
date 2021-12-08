@@ -30,7 +30,7 @@ python3 setup.py install
 In Python, create an empty dataset:
 
 ```python
-import grnportia as pt
+import portia as pt
 
 dataset = pt.GeneExpressionDataset()
 ```

@@ -5,7 +5,7 @@
 import numpy as np
 import pytest
 
-from grnportia.la import partial_inv
+from portia.la import partial_inv
 
 
 def test_partial_inv():

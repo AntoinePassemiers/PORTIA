@@ -4,7 +4,7 @@
 
 import numpy as np
 
-from grnportia.correction import apply_correction
+from portia.correction import apply_correction
 
 
 def test_corrections():
