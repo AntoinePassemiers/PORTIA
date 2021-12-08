@@ -20,6 +20,7 @@ setup(
     author_email='antoine.passemiers@kuleuven.be',
     packages=packages,
     package_data={},
+    url='https://github.com/AntoinePassemiers/PORTIA',
     description='PORTIA: Fast and Accurate Inference of Gene Regulatory Networks through Robust Precision Matrix Estimation',
     long_description=long_description,
     long_description_content_type='text/markdown',
