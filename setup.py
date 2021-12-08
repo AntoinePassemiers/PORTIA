@@ -7,7 +7,6 @@ from setuptools import setup
 
 packages = [
     'portia',
-    'portia.evaluation',
     'portia.optim'
 ]
 
