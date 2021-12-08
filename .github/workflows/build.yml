@@ -26,7 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pytest nose coverage
         python setup.py install
-        if [ -f requirements-all.txt ]; then pip install -r requirements-all.txt; fi
+        if [ -f requirements-etel.txt ]; then pip install -r requirements-etel.txt; fi
     - name: Test with nose
       run: |
         coverage run -m nose -v tests
