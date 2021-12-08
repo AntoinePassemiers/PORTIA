@@ -6,15 +6,32 @@ from setuptools import setup
 
 
 packages = [
-    'portia',
-    'portia.optim'
+    'grnportia',
+    'grnportia.optim'
 ]
 
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
 setup(
-    name='portia',
-    version='1.0.0',
-    description='Fast and Accurate Inference of Gene Regulatory Networks through Robust Precision Matrix Estimation',
+    name='grnportia',
+    version='0.0.1',
     author='Antoine Passemiers',
+    author_email='antoine.passemiers@kuleuven.be',
     packages=packages,
-    package_data={})
+    package_data={},
+    description='PORTIA: Fast and Accurate Inference of Gene Regulatory Networks through Robust Precision Matrix Estimation',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+        'Operating System :: OS Independent',
+    ],
+    python_requires='>=3.6',
+    install_requires=[
+        'numpy>=1.19.5',
+        'scipy',
+        'scikit-learn'
+    ],
+)

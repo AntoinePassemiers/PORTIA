@@ -8,10 +8,10 @@ import numpy as np
 import scipy.spatial
 from sklearn.preprocessing import PowerTransformer, StandardScaler
 
-from portia.correction import apply_correction
-from portia.dataset import GeneExpressionDataset
-from portia.exceptions import *
-from portia.la import partial_inv
+from grnportia.correction import apply_correction
+from grnportia.dataset import GeneExpressionDataset
+from grnportia.exceptions import *
+from grnportia.la import partial_inv
 
 
 class Method(enum.Enum):
