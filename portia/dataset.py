@@ -38,7 +38,7 @@ class GeneExpressionDataset:
 
     def add(self, experiment):
         self.X.append(experiment.expression)
-        z = np.zeros(len(experiment.experiment), dtype=bool)
+        z = np.zeros(len(experiment.expression), dtype=bool)
         z[experiment.knockout] = 1
         self.Z.append(z)
         if self.n_genes > 0:
