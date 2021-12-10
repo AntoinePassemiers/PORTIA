@@ -40,7 +40,7 @@ class Method(enum.Enum):
                 f'Method should be "fast", "end-to-end" or "no-transform".')
 
 
-def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, verbose=True):
+def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return_sign=False, verbose=True):
     """Infers a Gene Regulatory Network (GRN) from gene expression data.
 
     The output network is a score matrix of shape (n_genes, n_genes).
@@ -58,11 +58,15 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, verbos
             The higher, the smaller the condition number of the covariance matrix will be.
         normalize (bool): Whether to normalize each experiment separately or not.
             Normalization is based on the median.
+        return_sign (bool): Whether to return the signs of inferred regulatory links.
         verbose (bool): Whether to print information to the standard output.
 
     Returns:
         :obj:`np.ndarray`: A real-valued estimation of the adjacency matrix of the GRN.
             The scores range from 0 to 1.
+        :obj:`np.ndarray`: Returned only when `return_sign` is True. An integer matrix
+            of same shape as the score matrix, where 1 indicates a positive regulatory relation,
+            -1 a negative regulatory relation, and 0 no relation at all.
     """
     
     # Arbitrarily-small value used for numerical stability purposes
@@ -184,7 +188,12 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, verbos
     if _range > 0:
         _M_bar = (_M_bar - _M_bar.min()) / _range
 
-    return _M_bar
+    if return_sign:
+        signs = np.sign(_Theta)
+        np.fill_diagonal(_Theta, 0)
+        return _M_bar, signs
+    else:
+        return _M_bar
 
 
 def rank_scores(scores, gene_names, tf_names=None, limit=np.inf, diagonal=False):

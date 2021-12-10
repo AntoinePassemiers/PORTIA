@@ -33,10 +33,14 @@ class GeneExpressionDataset:
         self.experiments = dict()
         self.knockout = []
         self.knockdown = []
-        self.X = list()
+        self.X = []
+        self.Z = []
 
     def add(self, experiment):
         self.X.append(experiment.expression)
+        z = np.zeros(len(experiment.experiment), dtype=bool)
+        z[experiment.knockout] = 1
+        self.Z.append(z)
         if self.n_genes > 0:
             assert self.n_genes == experiment.n_genes
         if experiment.id not in self.experiments:

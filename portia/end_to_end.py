@@ -170,7 +170,8 @@ def apply_optimal_transform(X, aweights=None, _lambda=0.8, max_n_iter=100,
 
         convergence.step(loss.item())
 
-        print(f'Loss at iteration {iteration}: {loss.item()}')
+        if verbose:
+            print(f'Loss at iteration {iteration}: {loss.item()}')
         iteration += 1
 
     boxcox.standardize = True
