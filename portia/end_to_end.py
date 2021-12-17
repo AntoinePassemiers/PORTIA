@@ -118,7 +118,7 @@ def apply_optimal_transform(X, aweights=None, _lambda=0.8, max_n_iter=100,
     n_samples = X.shape[0]
     n_genes = X.shape[1]
 
-    boxcox = BoxCoxTransform(n_genes, epsilon=epsilon, standardize=False, epsilon=epsilon)
+    boxcox = BoxCoxTransform(n_genes, epsilon=epsilon, standardize=False)
     boxcox.init(X)
     X = torch.DoubleTensor(X)
 
