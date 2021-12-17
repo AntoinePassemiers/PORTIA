@@ -34,13 +34,13 @@ class GeneExpressionDataset:
         self.knockout = []
         self.knockdown = []
         self.X = []
-        self.Z = []
+        self.K = []
 
     def add(self, experiment):
         self.X.append(experiment.expression)
-        z = np.zeros(len(experiment.expression), dtype=bool)
-        z[experiment.knockout] = 1
-        self.Z.append(z)
+        k = np.zeros(len(experiment.expression), dtype=bool)
+        k[experiment.knockout] = 1
+        self.K.append(k)
         if self.n_genes > 0:
             assert self.n_genes == experiment.n_genes
         if experiment.id not in self.experiments:
@@ -71,9 +71,15 @@ class GeneExpressionDataset:
             X.append(experiment.expression)
         X = np.asarray(X)
         if mean is None:
-            mean = np.mean(X, axis=0)
+            if len(X) > 0:
+                mean = np.mean(X, axis=0)
+            else:
+                mean = np.zeros(self.n_genes)
         if std is None:
-            std = np.std(X, axis=0) + 1e-50
+            if len(X) > 0:
+                std = np.std(X, axis=0) + 1e-50
+            else:
+                std = np.ones(self.n_genes)
 
         # Get the set of genes that have been knocked-out at least once
         ko_genes = set()
