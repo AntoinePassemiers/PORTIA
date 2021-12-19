@@ -124,8 +124,6 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
     else:
         weights = np.ones(n_samples) / n_samples
 
-    print('TODO')
-
     # Box-Cox transform
     mask = np.asarray([(len(np.unique(_X[:, i])) > 1) for i in range(n_genes)], dtype=np.bool_)
     if method == Method.FAST:
@@ -140,7 +138,7 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
             _X_transformed = _X
             from portia.end_to_end import apply_optimal_transform
             _X_transformed[:, mask] = apply_optimal_transform(
-                _X[:, mask], aweights=weights, _lambda=_lambda, max_n_iter=1000, verbose=verbose)
+                _X[:, mask], aweights=weights, _lambda=_lambda, max_n_iter=100, verbose=verbose)
         else:
             _X_transformed = _X
     else:

@@ -15,7 +15,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='portia-grn',
-    version='0.0.8',
+    version='0.0.9',
     author='Antoine Passemiers',
     author_email='antoine.passemiers@kuleuven.be',
     packages=packages,
