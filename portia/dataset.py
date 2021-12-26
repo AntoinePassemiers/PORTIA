@@ -37,6 +37,7 @@ class GeneExpressionDataset:
         self.K = []
 
     def add(self, experiment):
+        assert isinstance(experiment, Experiment)
         self.X.append(experiment.expression)
         k = np.zeros(len(experiment.expression), dtype=bool)
         k[experiment.knockout] = 1
@@ -66,7 +67,7 @@ class GeneExpressionDataset:
         counts = np.zeros((self.n_genes, self.n_genes), dtype=np.int)
 
         # Compute statistics
-        X = list()
+        X = []
         for experiment in self.knockout:
             X.append(experiment.expression)
         X = np.asarray(X)
@@ -81,35 +82,28 @@ class GeneExpressionDataset:
             else:
                 std = np.ones(self.n_genes)
 
-        # Get the set of genes that have been knocked-out at least once
-        ko_genes = set()
+        # Compute Z-scores
         for experiment in self.knockout:
             gene_ids = experiment.knockout
             if len(gene_ids) == 1:
-                ko_genes.add(list(gene_ids)[0])
-
-        # Compute Z-scores
-        for i in ko_genes:
-            for experiment in self.knockout:
-                gene_ids = experiment.knockout
-                if (len(gene_ids) == 1) and (i in gene_ids):
-                    S[i, :] += np.abs(experiment.expression - mean) / std
-                    counts[i, :] += 1
+                i = gene_ids[0]
+                S[i, :] += np.abs(experiment.expression - mean) / std
+                counts[i, :] += 1
         if np.sum(counts) > 0:
             mask = np.logical_or(counts == 0, counts.T == 0)
             S[~mask] = S[~mask] / counts[~mask]
             mean = np.mean(S[~mask])
-            if mean != 0:
-                S[~mask] /= mean
+            if mean == 0:
+                S[~mask] = 1
             else:
-                S[mask] = 1
-            S[mask] = np.quantile(S[~mask], 0.5)
-            np.fill_diagonal(S, 0)
+                S[~mask] /= np.median(S[~mask])
+            S[mask] = 1
             if np.sum(S) <= 0:
                 S = np.ones((self.n_genes, self.n_genes))
         else:
             S = np.ones((self.n_genes, self.n_genes))
 
+        np.fill_diagonal(S, 0)
         return S
 
     def asarray(self):
@@ -129,3 +123,6 @@ class GeneExpressionDataset:
     @property
     def n_genes(self):
         return self.n_features
+
+    def has_ko(self):
+        return len(self.knockout) > 0

@@ -4,6 +4,7 @@
 
 import enum
 import collections.abc
+import warnings
 import numpy as np
 import scipy.spatial
 from sklearn.preprocessing import PowerTransformer, StandardScaler
@@ -11,7 +12,7 @@ from sklearn.preprocessing import PowerTransformer, StandardScaler
 from portia.correction import apply_correction
 from portia.dataset import GeneExpressionDataset
 from portia.exceptions import *
-from portia.la import partial_inv
+from portia.la import partial_inv, all_linear_regressions
 
 
 class Method(enum.Enum):
@@ -103,8 +104,17 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
     if verbose:
         print(f'Gene expression matrix of shape ({n_samples}, {n_genes})')
 
-    # Compute null-mutant Z-scores
-    _F = dataset.compute_null_mutant_zscores()
+    # Check missing values
+    if np.any(np.isnan(_X)):
+        raise NotImplementedError('Missing values are not supported (yet).')
+
+    # Check the presence of negative values
+    mask = np.any(_X < 0, axis=0)
+    if np.any(mask):
+        warnings.warn(
+            'Expression data contain negative values. ' \
+            'It is recommended to provide raw data instead.')
+        _X[:, mask] -= (np.min(_X[:, mask], axis=0) - 1e-2)
 
     # Normalize experiments
     if normalize:
@@ -138,7 +148,7 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
             _X_transformed = _X
             from portia.end_to_end import apply_optimal_transform
             _X_transformed[:, mask] = apply_optimal_transform(
-                _X[:, mask], aweights=weights, _lambda=_lambda, max_n_iter=100, verbose=verbose)
+                _X[:, mask], aweights=weights, _lambda=_lambda, max_n_iter=1000, verbose=verbose)
         else:
             _X_transformed = _X
     else:
@@ -155,7 +165,7 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
     _S_bar = _lambda * np.eye(n_genes) + (1. - _lambda) * _S
 
     # Compute precision matrix
-    if (tf_idx is not None) and (len(tf_idx) < n_genes):
+    if (tf_idx is not None) and (len(tf_idx) < 0.5 * n_genes):
         _Theta = partial_inv(_S_bar, tf_idx)
     else:
         _Theta = np.linalg.inv(_S_bar)
@@ -174,11 +184,30 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
     # No gene self-regulation
     np.fill_diagonal(_M, 0)
 
-    # Combine corrected precision matrix and Z-scores
-    norm = np.linalg.norm(_F)
-    if norm > 0:
-        _F = _F / norm
-    _M_bar = _M * _F ** 2
+    # Break symmetry using linear regressions
+    # OLS estimators are approximated using precision matrix
+    beta = all_linear_regressions(_X_transformed)
+    beta = np.abs(beta)
+    np.fill_diagonal(beta, 0)
+    _sum = np.sum(beta, axis=0)
+    div_mask = (_sum > 0)
+    beta[:, div_mask] /= _sum[np.newaxis, div_mask]
+    div = np.maximum(beta, beta.T)
+    div_mask = (div > 0)
+    beta[div_mask] /= div[div_mask]
+    _M = _M * beta
+
+    # Compute null-mutant Z-scores (if KOs are available)
+    if dataset.has_ko():
+        _F = dataset.compute_null_mutant_zscores()
+
+        # Combine corrected precision matrix and Z-scores
+        norm = np.linalg.norm(_F)
+        if norm > 0:
+            _F = _F / norm
+        _M_bar = _M * _F ** 2
+    else:
+        _M_bar = _M
 
     # Promote scores from "hub" genes
     _M_bar *= np.std(_M_bar, axis=1)[:, np.newaxis]

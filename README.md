@@ -62,6 +62,12 @@ The output `M_bar` is a matrix, where each element `M_bar[i, j]` is a score in t
 M_bar = pt.run(dataset, tf_idx=tf_idx, method='fast')
 ```
 
+The mode of regulation (sign of regulatory link) can be retrieved by passing the `return_sign` argument. When set to True, both inferred network and sign matrix will be returned. Sign matrix `S` is a matrix of same shape as `M_bar`, where 1 stands for activition, -1 stands for inhibition, and 0 stands for no (self-)regulation.
+
+```python
+M_bar, S = pt.run(dataset, tf_idx=tf_idx, method='fast', return_sign=True)
+```
+
 Finally, rank and store the results in a text file. `gene_names` is the list of your genes, provided in the correct order.
 
 ```python
