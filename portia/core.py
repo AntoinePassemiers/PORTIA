@@ -5,14 +5,14 @@
 import enum
 import collections.abc
 import warnings
-import numpy as np
+
 import scipy.spatial
 from sklearn.preprocessing import PowerTransformer, StandardScaler
 
 from portia.correction import apply_correction
 from portia.dataset import GeneExpressionDataset
 from portia.exceptions import *
-from portia.la import partial_inv, all_linear_regressions
+from portia.la import *
 
 
 class Method(enum.Enum):
@@ -41,7 +41,8 @@ class Method(enum.Enum):
                 f'Method should be "fast", "end-to-end" or "no-transform".')
 
 
-def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return_sign=False, verbose=True):
+def run(dataset, tf_idx=None, method='fast', lambda1=0.8, lambda2=0.05, n_iter=1000,
+        normalize=True, return_sign=False, verbose=True):
     """Infers a Gene Regulatory Network (GRN) from gene expression data.
 
     The output network is a score matrix of shape (n_genes, n_genes).
@@ -55,8 +56,11 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
             regulating genes.
         method (str): Non-linear transformation of gene expression data.
             Should be either "fast", "end-to-end" or "no-transform".
-        _lambda (float): Shrinkage parameter for the estimation of the covariance matrix.
+        lambda1 (float): Shrinkage parameter for the estimation of the covariance matrix.
             The higher, the smaller the condition number of the covariance matrix will be.
+        lambda2 (float): Tiknonov regularization rate for inferring directional information
+            from gene expression exclusively.
+        n_iter (int): Maximum number of iterations ("end-to-end" method only).
         normalize (bool): Whether to normalize each experiment separately or not.
             Normalization is based on the median.
         return_sign (bool): Whether to return the signs of inferred regulatory links.
@@ -81,17 +85,20 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
         tf_idx = np.arange(0, dataset.n_genes)
     if not isinstance(tf_idx, collections.abc.Iterable):
         raise InvalidParameterError('Parameter "tf_idx" should be an iterable (e.g. list or array), or None.')
+    tf_idx = np.asarray(tf_idx)
     try:
         _min = np.min(tf_idx)
         _max = np.max(tf_idx)
         if (_min < 0) or (_max >= dataset.n_genes):
             raise InvalidParameterError('Parameter "tf_idx" should contain indices in [0, n_genes - 1].')
-        if len(np.unique(tf_idx)) != len(tf_idx):
+        if len(np.unique(tf_idx)) != tf_idx.shape[0]:
             raise InvalidParameterError('Parameter "tf_idx" should not contain redundant indices.')
     except:
         raise InvalidParameterError('Parameter "tf_idx" should contain 0-based indices.')
-    if not (0 <= _lambda <= 1):
-        raise InvalidParameterError('Shrinkage parameter "_lambda" should be in [0, 1].')
+    if not (0 <= lambda1 <= 1):
+        raise InvalidParameterError('Shrinkage parameter "lambda1" should be in [0, 1].')
+    if not (0 <= lambda2 <= 1):
+        raise InvalidParameterError('Shrinkage parameter "lambda2" should be in [0, 1].')
     if not isinstance(normalize, bool):
         raise InvalidParameterError('Parameter "normalize" should be of boolean type.')
     if not isinstance(verbose, bool):
@@ -112,7 +119,7 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
     mask = np.any(_X < 0, axis=0)
     if np.any(mask):
         warnings.warn(
-            'Expression data contain negative values. ' \
+            'Expression data contain negative values. '
             'It is recommended to provide raw data instead.')
         _X[:, mask] -= (np.min(_X[:, mask], axis=0) - 1e-2)
 
@@ -144,11 +151,11 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
         else:
             _X_transformed = _X + epsilon
     elif method == Method.END_TO_END:
-        if np.sum(mask) > 1:
+        if np.sum(mask) > 0:
             _X_transformed = _X
             from portia.end_to_end import apply_optimal_transform
             _X_transformed[:, mask] = apply_optimal_transform(
-                _X[:, mask], aweights=weights, _lambda=_lambda, max_n_iter=1000, verbose=verbose)
+                _X[:, mask], aweights=weights, _lambda=lambda1, max_n_iter=1000, verbose=verbose)
         else:
             _X_transformed = _X
     else:
@@ -162,7 +169,7 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
     _S = np.cov(_X_transformed.T, ddof=1, aweights=weights)
 
     # Apply covariance matrix shrinkage
-    _S_bar = _lambda * np.eye(n_genes) + (1. - _lambda) * _S
+    _S_bar = lambda1 * np.eye(n_genes) + (1. - lambda1) * _S
 
     # Compute precision matrix
     if (tf_idx is not None) and (len(tf_idx) < 0.5 * n_genes):
@@ -184,14 +191,12 @@ def run(dataset, tf_idx=None, method='fast', _lambda=0.8, normalize=True, return
     # No gene self-regulation
     np.fill_diagonal(_M, 0)
 
-    # Break symmetry using linear regressions
-    # OLS estimators are approximated using precision matrix
-    beta = all_linear_regressions(_X_transformed)
+    # Break symmetry using linear regressions.
+    # All OLS estimators are efficiently computed from a single
+    # covariance matrix, using Sherman-Morrison formula.
+    beta = all_linear_regressions(_X_transformed, _lambda=lambda2)
     beta = np.abs(beta)
     np.fill_diagonal(beta, 0)
-    _sum = np.sum(beta, axis=0)
-    div_mask = (_sum > 0)
-    beta[:, div_mask] /= _sum[np.newaxis, div_mask]
     div = np.maximum(beta, beta.T)
     div_mask = (div > 0)
     beta[div_mask] /= div[div_mask]

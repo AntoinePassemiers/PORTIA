@@ -124,8 +124,8 @@ def apply_optimal_transform(X, aweights=None, _lambda=0.8, max_n_iter=100,
 
     boxcox.bc_lambda_1.data = torch.clamp(boxcox.bc_lambda_1.data, -60, 60)
 
-    optimizer = torch.optim.Adam([
-        {'params': boxcox.parameters(), 'lr': 0.5*1e-2}
+    optimizer = torch.optim.SGD([
+        {'params': boxcox.parameters(), 'lr': 2*1e-4}
     ])
     convergence = LocalConvergence(5, max_n_iter=max_n_iter, tau=1e-7)
 
@@ -157,8 +157,8 @@ def apply_optimal_transform(X, aweights=None, _lambda=0.8, max_n_iter=100,
                 print('Invalid value encountered. Falling back to sequential PORTIA.')
 
         S = torch.inverse(C_reg)
-        #ll = -0.5 * (n_samples - 1.) * torch.trace(torch.mm(Theta, C)) + 0.5 * n_samples * logdet
-        ll = -0.5 * n_samples * torch.trace(torch.mm(Theta, C)) + 0.5 * n_samples * logdet
+        ll = -0.5 * (n_samples - 1.) * torch.trace(torch.mm(Theta, C)) + 0.5 * n_samples * logdet
+        # ll = -0.5 * n_samples * torch.trace(torch.mm(Theta, C)) + 0.5 * n_samples * logdet
 
         jac1 = torch.sum((boxcox.bc_lambda_1 - 1.) * sum_log_x)
         loss = -ll - jac1

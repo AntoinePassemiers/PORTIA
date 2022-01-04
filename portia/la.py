@@ -6,6 +6,37 @@ import numpy as np
 
 
 def all_linear_regressions(X, _lambda=0.05):
+    """
+    aiu2 = u^T @ T_j
+         = u^T @ T - u^T @ aiun @ vai^T
+         = (T^T @ u)^T - u^T @ aiun @ vai^T
+         = aiu - u^T @ aiun @ vai^T
+    vai2 = T_j @ v
+         = T @ v - aiun @ vai^T @ v
+         = vai - aiun @ vai^T @ v
+    """
+    n_genes = X.shape[1]
+    S = _lambda * np.eye(n_genes) + (1. - _lambda) * np.cov(X.T)
+    T = np.linalg.inv(S)
+    B = T @ X.T @ X
+    u = np.zeros(n_genes)
+
+    V = -S - np.eye(n_genes)
+    VAI = np.dot(V.T, T)
+    den1 = 1. + np.sum(V * T, axis=0)
+
+    B -= T * (np.sum(np.dot(X, VAI) * X, axis=0) / den1)[np.newaxis, :]
+    AIU2 = T - VAI * (np.diag(T) / den1)[np.newaxis, :]
+    VAIV = np.sum(VAI * V, axis=0)
+    XAIU2X = np.sum(np.dot(X, AIU2) * X, axis=0)
+
+    B -= (VAI - T * (VAIV / den1)[np.newaxis, :]) * (XAIU2X / (1. + np.sum(V * AIU2, axis=0)))[np.newaxis, :]
+
+    np.fill_diagonal(B, 0)
+    return B
+
+
+def all_linear_regressions_slow(X, _lambda=0.05):
     n_genes = X.shape[1]
     S = _lambda * np.eye(n_genes) + (1. - _lambda) * np.cov(X.T)
     T = np.linalg.inv(S)
@@ -26,11 +57,12 @@ def all_linear_regressions(X, _lambda=0.05):
         v[j] = 0
         aiu = np.dot(T_j.T, u)
         vai = np.dot(v, T_j.T)
-        T_j = T_j - np.outer(aiu, vai) / (1. + np.dot(v, aiu))
+        T_j = (T_j.T - np.outer(aiu, vai) / (1. + np.dot(v, aiu))).T
 
         # Remove j-th variable (explained variable) from the set of explanatory variables
         T_j[:, j] = 0
         T_j[j, :] = 0
+        T_j[j, j] = 0
 
         # Compute OLS estimator (see Gauss-Markov theorem)
         B[:, j] = T_j.dot(X.T).dot(X[:, j])
@@ -38,7 +70,7 @@ def all_linear_regressions(X, _lambda=0.05):
     return B
 
 
-def all_linear_regressions_naive(X, _lambda=0.8):
+def all_linear_regressions_naive(X, _lambda=0.05):
     n_genes = X.shape[1]
     beta = []
     for j in range(n_genes):
