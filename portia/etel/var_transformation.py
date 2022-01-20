@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  exceptions.py
+#  var_transformation.py
 #  
 #  Copyright 2022 Antoine Passemiers <antoine.passemiers@gmail.com>
 #  
@@ -19,6 +19,25 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 
+from abc import ABCMeta, abstractmethod
 
-class InvalidParameterError(Exception):
-	pass
+import torch
+
+
+class VariableTransformation(torch.nn.Module, metaclass=ABCMeta):
+
+    def __init__(self):
+        torch.nn.Module.__init__(self)
+
+    def forward(self, X):
+        Y = self._forward(X)
+        log_jac = self.log_jacobian(X)
+        return Y, log_jac
+
+    @abstractmethod
+    def _forward(self, X):
+        pass
+
+    @abstractmethod
+    def log_jacobian(self, X):
+        pass

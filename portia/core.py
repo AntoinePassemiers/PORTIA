@@ -1,6 +1,23 @@
 # -*- coding: utf-8 -*-
-# core.py
-# author: Antoine Passemiers
+#
+#  core.py
+#  
+#  Copyright 2022 Antoine Passemiers <antoine.passemiers@gmail.com>
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
 
 import enum
 import collections.abc
@@ -155,7 +172,8 @@ def run(dataset, tf_idx=None, method='fast', lambda1=0.8, lambda2=0.05, n_iter=1
             _X_transformed = _X
             from portia.end_to_end import apply_optimal_transform
             _X_transformed[:, mask] = apply_optimal_transform(
-                _X[:, mask], aweights=weights, _lambda=lambda1, max_n_iter=1000, verbose=verbose)
+                    _X[:, mask] + 1e-45, aweights=weights, _lambda=lambda1,
+                    max_n_iter=100, verbose=verbose)
         else:
             _X_transformed = _X
     else:

@@ -7,6 +7,7 @@ from setuptools import setup
 
 packages = [
     'portia',
+    'portia.etel',
     'portia.optim'
 ]
 
@@ -15,7 +16,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='portia-grn',
-    version='0.0.9',
+    version='0.0.10',
     author='Antoine Passemiers',
     author_email='antoine.passemiers@kuleuven.be',
     packages=packages,
