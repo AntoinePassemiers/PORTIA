@@ -23,7 +23,6 @@ import os
 import sys
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from portia.gt.causal_structure import CausalStructure
 from portia.gt.grn import GRN
@@ -39,7 +38,7 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
     # Import Cython module
     import pyximport
     pyximport.install(setup_args={'include_dirs': np.get_include()})
-    from topology import _evaluate, _all_connected
+    from topology import _evaluate, _all_connected  # pylint: disable=import-error
 
     # Check TF mask
     if tf_mask is None:
@@ -139,6 +138,7 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
 
 
 def plot_fp_types(ax, G_target, G_pred, T, tf_mask=None, n_pred=300):
+    import matplotlib.pyplot as plt  # pylint: disable=import-error
 
     # Check TF mask
     if tf_mask is None:
