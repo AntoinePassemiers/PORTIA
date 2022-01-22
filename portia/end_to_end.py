@@ -30,13 +30,13 @@ def cov(X, ddof=0, aweights=None):
     """Differentiable covariance matrix estimation.
 
     Args:
-        X (:obj:`np.ndarray`): Matrix of observations, of shape (n_samples, n_genes).
+        X (:obj:`torch.Tensor`): Matrix of observations, of shape (n_samples, n_genes).
         ddof (int, optional): When ddof=1, unbiased estimator is used.
-        aweights (:obj:`np.ndarray`): Array of sample weights, of shape (n_samples,).
+        aweights (:obj:`torch.Tensor`): Array of sample weights, of shape (n_samples,).
             If None, all observations have equal weights.
 
     Returns:
-        :obj:`portia.GeneExpressionDataset`: Estimated covariance matrix, of shape (n_genes, n_genes).
+        :obj:`torch.Tensor`: Estimated covariance matrix, of shape (n_genes, n_genes).
     """
 
     if (aweights is not None) and (not torch.is_tensor(aweights)):
@@ -104,9 +104,9 @@ def apply_optimal_transform(X, aweights=None, _lambda=0.8, max_n_iter=100, verbo
         C_reg = _lambda * torch.diag(torch.diagonal(C)) + (1. - _lambda) * C
 
         try:
-            U = torch.linalg.cholesky(C_reg, upper=True)
-            Theta = torch.cholesky_inverse(U, upper=True)
-            logdet = -2. * torch.sum(torch.log(torch.diagonal(U)))
+            L = torch.linalg.cholesky(C_reg)
+            Theta = torch.cholesky_inverse(L)
+            logdet = -2. * torch.sum(torch.log(torch.diagonal(L)))
             # Theta = torch.inverse(C_reg)
             # logdet = torch.logdet(Theta)
         except RuntimeError:

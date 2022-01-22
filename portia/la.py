@@ -23,7 +23,9 @@ import numpy as np
 
 
 def all_linear_regressions(X, _lambda=0.05):
-    """
+    """Perform m linear regressions in cubic time,
+    using the same covariance matrix.
+
     aiu2 = u^T @ T_j
          = u^T @ T - u^T @ aiun @ vai^T
          = (T^T @ u)^T - u^T @ aiun @ vai^T
@@ -36,7 +38,6 @@ def all_linear_regressions(X, _lambda=0.05):
     S = _lambda * np.eye(n_genes) + (1. - _lambda) * np.cov(X.T)
     T = np.linalg.inv(S)
     B = T @ X.T @ X
-    u = np.zeros(n_genes)
 
     V = -S - np.eye(n_genes)
     VAI = np.dot(V.T, T)

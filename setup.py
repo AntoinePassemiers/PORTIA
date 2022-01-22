@@ -2,21 +2,32 @@
 # setup.py
 # author: Antoine Passemiers
 
+import re
+
 from setuptools import setup
 
 
 packages = [
     'portia',
     'portia.etel',
+    'portia.gt',
     'portia.optim'
 ]
 
 with open('README.md', 'r') as f:
     long_description = f.read()
 
+
+def get_property(prop, project):
+    # Solution proposed in:
+    # https://stackoverflow.com/questions/17791481/creating-a-version-attribute-for-python-packages-without-getting-into-troubl
+    result = re.search(r'{}\s*=\s*[\'"]([^\'"]*)[\'"]'.format(prop), open(project + '/__init__.py').read())
+    return result.group(1)
+
+
 setup(
     name='portia-grn',
-    version='0.0.10',
+    version=get_property('__version__', 'portia'),
     author='Antoine Passemiers',
     author_email='antoine.passemiers@kuleuven.be',
     packages=packages,
