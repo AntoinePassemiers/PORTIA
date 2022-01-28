@@ -87,7 +87,8 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
         CU = np.maximum(CU, CU.T)
 
         # Save regulatory relationship matrices
-        np.savez(filepath, C=C, CU=CU)
+        if filepath is not None:
+            np.savez(filepath, C=C, CU=CU)
     assert np.all(CU >= C)
 
     # No self-regulation
