@@ -73,7 +73,7 @@ def _evaluate(A, A_pred, C, CU, tf_mask):
     T[np.logical_and(mask, M)] = CausalStructure.UNDIRECTED
     np.logical_and(mask, ~M, out=mask)
 
-    T_sub[mask] = CausalStructure.SPURIOUS_CORRELATION
+    T[mask] = CausalStructure.SPURIOUS_CORRELATION
 
     T[~tf_mask, :] = CausalStructure.TRUE_NEGATIVE
     return T
