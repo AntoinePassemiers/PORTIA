@@ -27,21 +27,13 @@ import numpy as np
 from portia.gt.causal_structure import CausalStructure
 from portia.gt.grn import GRN
 from portia.gt.utils import nan_to_min
+from portia.gt.topology import _evaluate, _all_connected
 
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(ROOT)
+def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None, method='top'):
 
-
-def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
-
-    # Import Cython module
-    import pyximport
-    pyximport.install(setup_args={'include_dirs': np.get_include()})
-    try:
-        from topology import _evaluate, _all_connected  # pylint: disable=import-error
-    except ImportError:
-        from portia.gt.topology import _evaluate, _all_connected  # pylint: disable=import-error
+    method = method.strip().lower()
+    assert method in {'top', 'auto'}
 
     # Check TF mask
     if tf_mask is None:
@@ -63,9 +55,17 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
     AU = G_target.as_symmetric().asarray()
 
     # Convert predicted scores to binary adjacency matrix
-    n_edges = G_target.n_edges
-    A_binary_pred = G_pred.binarize(n_edges).asarray()
-    assert int(np.sum(A_binary_pred)) == n_edges
+    if method == 'top':
+        use_top = True
+    else:
+        use_top = (len(np.unique(G_target.asarray())) > 2)
+    if use_top:
+        n_edges = G_target.n_edges
+        A_binary_pred = G_pred.binarize(n_edges).asarray()
+        assert int(np.sum(A_binary_pred)) == n_edges
+    else:
+        A_binary_pred = (G_pred.asarray() >= np.max(G_pred.asarray()))
+        n_edges = np.sum(A_binary_pred)
 
     # Fill missing values
     np.nan_to_num(A, nan=0, copy=False)
@@ -98,6 +98,9 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
     np.fill_diagonal(A, 0)
     np.fill_diagonal(C, 0)
     np.fill_diagonal(CU, 0)
+
+    print(A.astype(int))
+    print(A_binary_pred.astype(int))
 
     # Categorise predictions based on local causal structures
     results = {'T': _evaluate(A, A_binary_pred, C, CU, tf_mask)}

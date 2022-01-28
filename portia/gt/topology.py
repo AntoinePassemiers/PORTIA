@@ -47,6 +47,7 @@ def _evaluate(A, A_pred, C, CU, tf_mask):
     C = np.asarray(C, dtype=bool)
     CU = np.asarray(CU, dtype=bool)
     T = np.zeros(A.shape, np.uint8)
+    tf_mask = np.asarray(tf_mask, dtype=bool)
     n_genes = A.shape[0]
 
     assert A.shape == (n_genes, n_genes)
@@ -58,26 +59,38 @@ def _evaluate(A, A_pred, C, CU, tf_mask):
     mask = np.logical_and(A_pred, ~A)
 
     M = C
-    T[np.logical_and(mask, M)] = CausalStructure.CHAIN
+    T[np.logical_and(mask, M)] = int(CausalStructure.CHAIN)
     np.logical_and(mask, ~M, out=mask)
 
     M = C.T
-    T[np.logical_and(mask, M)] = CausalStructure.CHAIN_REVERSED
+    T[np.logical_and(mask, M)] = int(CausalStructure.CHAIN_REVERSED)
     np.logical_and(mask, ~M, out=mask)
 
     M = np.dot(C.T, C).astype(bool)
-    T[np.logical_and(mask, M)] = CausalStructure.FORK
+    T[np.logical_and(mask, M)] = int(CausalStructure.FORK)
     np.logical_and(mask, ~M, out=mask)
 
     M = np.dot(C, C.T).astype(bool)
-    T[np.logical_and(mask, M)] = CausalStructure.COLLIDER
+    T[np.logical_and(mask, M)] = int(CausalStructure.COLLIDER)
     np.logical_and(mask, ~M, out=mask)
 
     M = CU
-    T[np.logical_and(mask, M)] = CausalStructure.UNDIRECTED
+    T[np.logical_and(mask, M)] = int(CausalStructure.UNDIRECTED)
     np.logical_and(mask, ~M, out=mask)
 
-    T[mask] = CausalStructure.SPURIOUS_CORRELATION
+    T[mask] = int(CausalStructure.SPURIOUS_CORRELATION)
 
-    T[~tf_mask, :] = CausalStructure.TRUE_NEGATIVE
+    mask = np.logical_and(~A_pred, ~A)
+    T[mask] = int(CausalStructure.TRUE_NEGATIVE)
+
+    mask = np.logical_and(~A_pred, A)
+    T[mask] = int(CausalStructure.FALSE_NEGATIVE)
+
+    mask = np.logical_and(A_pred, A)
+    T[mask] = int(CausalStructure.TRUE_POSITIVE)
+
+    T[~tf_mask, :] = int(CausalStructure.TRUE_NEGATIVE)
+
+    np.fill_diagonal(T, int(CausalStructure.TRUE_NEGATIVE))
+
     return T
