@@ -42,6 +42,10 @@ def _all_connected(A, tf_mask):
 
 
 def _evaluate(A, A_pred, C, CU, tf_mask):
+    A = np.asarray(A, dtype=bool)
+    A_pred = np.asarray(A_pred, dtype=bool)
+    C = np.asarray(C, dtype=bool)
+    CU = np.asarray(CU, dtype=bool)
     T = np.zeros(A.shape, np.uint8)
     n_genes = A.shape[0]
 
