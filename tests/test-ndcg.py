@@ -2,7 +2,7 @@
 # test-ndcg.py
 # author: Antoine Passemiers
 
-from porta.gt.evaluation import graph_theoretic_evaluation
+from portia.gt.evaluation import graph_theoretic_evaluation
 
 
 def test_ndcg_random():
