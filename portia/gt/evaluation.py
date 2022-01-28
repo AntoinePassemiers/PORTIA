@@ -69,7 +69,7 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
     np.nan_to_num(AU, nan=0, copy=False)
     A_binary_pred = nan_to_min(A_binary_pred)
 
-    if os.path.exists(filepath):
+    if (filepath is not None) and os.path.exists(filepath):
         data = np.load(filepath)
         C = data['C']
         CU = data['CU']
