@@ -2,6 +2,8 @@
 # test-ndcg.py
 # author: Antoine Passemiers
 
+import numpy as np
+
 from portia.gt.evaluation import graph_theoretic_evaluation
 
 
