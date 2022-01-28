@@ -48,10 +48,10 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
     # Ensure GRNs
     if not isinstance(G_target, GRN):
         tf_idx = np.where(tf_mask)[0]
-        G_target = (G_target, tf_idx)
+        G_target = GRN(G_target, tf_idx)
     if not isinstance(G_pred, GRN):
         tf_idx = np.where(tf_mask)[0]
-        G_target = (G_pred, tf_idx)
+        G_target = GRN(G_pred, tf_idx)
 
     # Goldstandard adjacency matrix
     A = np.copy(G_target.asarray())
