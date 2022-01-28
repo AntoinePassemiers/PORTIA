@@ -38,7 +38,10 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None):
     # Import Cython module
     import pyximport
     pyximport.install(setup_args={'include_dirs': np.get_include()})
-    from topology import _evaluate, _all_connected  # pylint: disable=import-error
+    try:
+        from topology import _evaluate, _all_connected  # pylint: disable=import-error
+    except ImportError:
+        from portia.gt.topology import _evaluate, _all_connected  # pylint: disable=import-error
 
     # Check TF mask
     if tf_mask is None:
