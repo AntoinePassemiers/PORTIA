@@ -31,8 +31,6 @@ setup(
     author='Antoine Passemiers',
     author_email='antoine.passemiers@kuleuven.be',
     packages=packages,
-    package_data={'': ['portia/gt/topology.pyx']},
-    include_package_data=True,
     url='https://github.com/AntoinePassemiers/PORTIA',
     description='PORTIA: Fast and Accurate Inference of Gene Regulatory Networks through Robust Precision Matrix Estimation',
     long_description=long_description,
