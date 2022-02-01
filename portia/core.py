@@ -270,7 +270,7 @@ def rank_scores(scores, gene_names, tf_names=None, limit=np.inf, diagonal=False)
     if tf_names is None:
         tf_names = set(gene_names)
 
-    idx = np.argsort(scores.flatten(order='C'))[::-1]
+    idx = np.argsort(np.abs(scores.flatten(order='C')))[::-1]
     idx = np.unravel_index(idx, scores.shape, order='C')
 
     n_predictions = 0
@@ -285,8 +285,7 @@ def rank_scores(scores, gene_names, tf_names=None, limit=np.inf, diagonal=False)
             if (not diagonal) and (i == j):
                 continue
 
-            if scores[i, j] > 0:
-                yield gene_names[i], gene_names[j], scores[i, j]
-                n_predictions += 1
-                if n_predictions >= limit:
-                    break
+            yield gene_names[i], gene_names[j], scores[i, j]
+            n_predictions += 1
+            if n_predictions >= limit:
+                break

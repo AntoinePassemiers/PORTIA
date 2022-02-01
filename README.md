@@ -6,6 +6,7 @@
 <img align="left" src="docs/imgs/portia.svg" />
 
 Lightning-fast Gene Regulatory Network (GRN) inference tool.
+This repository also hosts our graph-theoretical Normalised Discounted Cumulative Gain (gtNDCG) score metric for evaluating inferred GRNs. Usage of both PORTIA and gtNDCG is explained below.
 
 PORTIA builds on power transforms and covariance matrix inversion to approximate GRNs, and is orders of magnitude faster than other existing tools (as of August 2021).
 
@@ -26,6 +27,12 @@ Install the package:
 ```bash
 python3 setup.py install
 ```
+
+PORTIA and gtNDCG can be run either:
+- From Python, using the library directly
+- As standalone scripts
+
+#### Using the library
 
 In Python, create an empty dataset:
 
@@ -76,4 +83,38 @@ with open('your_destination/results.txt', 'w') as f:
         f.write(f'{gene_a}\t{gene_b}\t{score}\n')
 ```
 
-Real examples on the DREAM datasets are provided in the `scripts/` folder.
+Scoring of the inferred GRN using our gtNDCG metric is done as follows:
+```python
+tf_mask = np.zeros(n_genes, dtype=bool)
+tf_mask[tf_idx] = True
+res = graph_theoretic_evaluation(tmp_filepath, G_target, G_pred, tf_mask=tf_mask)
+```
+
+where `tmp_filepath` is the name of the temporary file where to store accessibility matrices, in case the same goldstandard network is used multiple times in a row (e.g. to compare GRN inference methods). If `None` is provided, no temporary file will be written. `G_pred` and `G_pred` are NumPy matrices. NaN elements correspond to missing values. For the goldstandard network, a missing value means that there is no experimental evidence for a given gene pair (even for the absence of regulation). For the inferred network, a missing value means the absence of prediction. For `G_target`, 1 corresponds to a regulatory relationship and 0 the absence of such relation. Scores in `G_pred` are real-valued.
+
+#### Run standalone scripts (command line)
+
+`test-data` folder contains in silico-generated data meant for testing PORTIA and the gtNDCG metric scoring algorithm. The following command line infers a GRN from a gene expression dataset, and stores it in `test-data/out1.txt`:
+```
+python3 run.py test-data/dataset1.expression.txt --out test-data/out1.txt
+```
+
+A list of putative TFs and knock-out experiments can be pointed out in separate files:
+```
+python3 run.py test-data/dataset2.expression.txt --kos test-data/dataset2.kos.txt --tfs test-data/dataset2.tfs.txt --out test-data/out2.txt
+```
+
+Shrinkage parameters can be specified with the arguments `--lambda1 0.8` and `--lambda2 0.05`. Providing the `--signed` argument will make the predictions signed, and will thus contain negative values. For more information on the other arguments, you can access the help by running the `run.py` script without argument.
+
+Scoring the inferred network with the gtNDCG metric requires a goldstandard network:
+
+```
+python3 run_gt_ndcg.py test-data/out1.txt test-data/dataset1.goldstandard.txt --out test-data/results1
+```
+
+Results will be placed in folder `test-data/results1`.
+
+When a list of TFs is available, it should be provided to the script as well:
+```
+python3 run_gt_ndcg.py test-data/out2.txt test-data/dataset2.goldstandard.txt --tfs test-data/dataset2.tfs.txt --out test-data/results1
+```

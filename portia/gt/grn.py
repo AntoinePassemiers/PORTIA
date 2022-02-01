@@ -124,6 +124,9 @@ class GRN:
     def __setitem__(self, key, value):
         self.A[key] = value
 
+    def __len__(self):
+        return self.n_genes
+
     @property
     def shape(self):
         return self.A.shape
@@ -135,3 +138,8 @@ class GRN:
     @property
     def n_edges(self):
         return int(np.nansum(self.A))
+
+    @property
+    def n_negatives(self):
+        return np.sum(self.A == 0)
+    

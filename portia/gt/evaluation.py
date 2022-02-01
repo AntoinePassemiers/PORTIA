@@ -48,6 +48,15 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None, method=
         tf_idx = np.where(tf_mask)[0]
         G_pred = GRN(G_pred, tf_idx)
 
+    # Ensure there is at least one negative
+    # If there is no negative, negatives are added by filling all
+    # missing values with zeroes in rows for which there is experimental evidence.
+    # Indeed, since regulatory relationships are mostly discovered by experiments
+    # (e.g. KO), these experiments also provide evidence for the absence of regulatory
+    # relationships for the remaining target genes.
+    if G_target.n_negatives == 0:
+        G_target.add_negatives_inplace()
+
     # Goldstandard adjacency matrix
     A = np.copy(G_target.asarray())
 
@@ -99,9 +108,6 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None, method=
     np.fill_diagonal(C, 0)
     np.fill_diagonal(CU, 0)
 
-    print(A.astype(int))
-    print(A_binary_pred.astype(int))
-
     # Categorise predictions based on local causal structures
     results = {'T': _evaluate(A, A_binary_pred, C, CU, tf_mask)}
 
@@ -139,12 +145,16 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None, method=
     # Normalized Discounted Cumulative Gain (ranges between 0 and 1)
     ndcg = dcg / idcg
 
+    # For safety reasons
+    if n_edges == 0:
+        ndcg = 0
+
     # Store NDCG score
     results['score'] = ndcg
     return results
 
 
-def plot_fp_types(ax, G_target, G_pred, T, tf_mask=None, n_pred=300):
+def plot_fp_types(ax, G_target, G_pred, T, tf_mask=None, n_pred=300, remove_labels=True, legend=False):
     import matplotlib.pyplot as plt  # pylint: disable=import-error
 
     # Check TF mask
@@ -181,6 +191,7 @@ def plot_fp_types(ax, G_target, G_pred, T, tf_mask=None, n_pred=300):
     assert not np.any(np.isnan(types))
     assert not np.any(np.isnan(ys))
     assert not np.any(np.isnan(_as))
+    used_colors = set()
     for i in range(len(ys)):
         if not _as[i]:
             if types[i] > 0:
@@ -201,12 +212,23 @@ def plot_fp_types(ax, G_target, G_pred, T, tf_mask=None, n_pred=300):
                 else:
                     color = 'none'
                 if color != 'none':
-                    ax.bar(i, ys[i], width=0.4, color=color)
+                    if legend and (color not in used_colors):
+                        ax.bar(i, ys[i], width=0.4, color=color, label=CausalStructure.to_string(types[i]))
+                        used_colors.add(color)
+                    else:
+                        ax.bar(i, ys[i], width=0.4, color=color)
         if i + 1 >= n_links:
             break
     # plt.axvline(x=n_links, linewidth=1, linestyle='--', color='gray', alpha=0.5)
-    plt.tick_params(labelleft=False)
     ax.set_yscale('log')
-    ax.set(yticklabels=[" "])
-    ax.axes.yaxis.set_ticklabels([" "])
-    ax.axes.yaxis.set_visible(False)
+    if remove_labels:
+        plt.tick_params(labelleft=False)
+        ax.set(yticklabels=[" "])
+        ax.axes.yaxis.set_ticklabels([" "])
+        ax.axes.yaxis.set_visible(False)
+    else:
+        ax.set_ylabel('log(predicted score)', fontname='Century gothic')
+        ax.set_xlabel('Top n predictions', fontname='Century gothic')
+
+    if legend:
+        plt.legend()

@@ -11,6 +11,7 @@ packages = [
     'portia',
     'portia.etel',
     'portia.gt',
+    'portia.insilico',
     'portia.optim'
 ]
 

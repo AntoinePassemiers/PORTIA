@@ -58,39 +58,48 @@ def _evaluate(A, A_pred, C, CU, tf_mask):
 
     mask = np.logical_and(A_pred, ~A)
 
+    # Chains
     M = C
     T[np.logical_and(mask, M)] = int(CausalStructure.CHAIN)
     np.logical_and(mask, ~M, out=mask)
 
+    # Chains (reversed)
     M = C.T
     T[np.logical_and(mask, M)] = int(CausalStructure.CHAIN_REVERSED)
     np.logical_and(mask, ~M, out=mask)
 
+    # Forks
     M = np.dot(C.T, C).astype(bool)
     T[np.logical_and(mask, M)] = int(CausalStructure.FORK)
     np.logical_and(mask, ~M, out=mask)
 
+    # Colliders
     M = np.dot(C, C.T).astype(bool)
     T[np.logical_and(mask, M)] = int(CausalStructure.COLLIDER)
     np.logical_and(mask, ~M, out=mask)
 
+    # Undirected (d-separated)
     M = CU
     T[np.logical_and(mask, M)] = int(CausalStructure.UNDIRECTED)
     np.logical_and(mask, ~M, out=mask)
 
+    # Spurious correlations
     T[mask] = int(CausalStructure.SPURIOUS_CORRELATION)
 
+    # True negatives
     mask = np.logical_and(~A_pred, ~A)
     T[mask] = int(CausalStructure.TRUE_NEGATIVE)
 
+    # False negatives
     mask = np.logical_and(~A_pred, A)
     T[mask] = int(CausalStructure.FALSE_NEGATIVE)
 
+    # True positives
     mask = np.logical_and(A_pred, A)
     T[mask] = int(CausalStructure.TRUE_POSITIVE)
 
+    # True negatives
     T[~tf_mask, :] = int(CausalStructure.TRUE_NEGATIVE)
-
     np.fill_diagonal(T, int(CausalStructure.TRUE_NEGATIVE))
 
     return T
