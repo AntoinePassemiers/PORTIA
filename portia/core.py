@@ -285,6 +285,9 @@ def rank_scores(scores, gene_names, tf_names=None, limit=np.inf, diagonal=False)
             if (not diagonal) and (i == j):
                 continue
 
+            if scores[i, j] == 0:
+                break
+
             yield gene_names[i], gene_names[j], scores[i, j]
             n_predictions += 1
             if n_predictions >= limit:
