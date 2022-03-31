@@ -42,7 +42,13 @@ import portia as pt
 dataset = pt.GeneExpressionDataset()
 ```
 
-Microarray experiments can be added with the `GeneExpressionDataset.add` method. `data` must be an iterable (list, NumPy array, etc).
+Gene expression measurements can be added with the `GeneExpressionDataset.add` method. `data` must be an iterable (list, NumPy array, etc) of length `n_genes` containing floating point numbers.
+
+```python
+exp_id = 1
+data = [0, 0, ..., 1.03424, 1.28009]
+dataset.add(pt.Experiment(exp_id, data))
+```
 
 ```python
 for exp_id, data in enumerate(your_data):
