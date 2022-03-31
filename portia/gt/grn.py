@@ -37,13 +37,17 @@ class GRN:
         A = np.copy(self.A)
 
         # If one of the 2 directed edges is 1, then the undirected edge is 1
-        mask = np.isnan(self.A)
+        mask = np.isnan(A)
         A[mask] = 0
         A = np.maximum(A, A.T)
 
         # If both directed edges are unknown, then the undirected edge is unknown
         mask = np.logical_and(mask, mask.T)
         A[mask] = np.nan
+
+        # Ensure symmetric
+        _A = np.nan_to_num(A)
+        assert np.all(_A == _A.T)
 
         # Create a new GRN from the adjacency matrix and TF list
         return GRN(A, self.tf_idx)

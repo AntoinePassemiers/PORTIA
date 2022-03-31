@@ -88,9 +88,11 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None, method=
     else:
         # Find all pairs of connected vertices
         C = _all_connected(A, tf_mask)
+        C = (C > 0)
 
         # Find all pairs of connected vertices (undirected edges)
         CU = _all_connected(AU, np.ones(AU.shape[0]))
+        CU = (CU > 0)
 
         # If `i` indirectly regulates `j`, then an undirected regulatory relationship
         # exists between `j` and `i`, and vice versa
@@ -101,12 +103,13 @@ def graph_theoretic_evaluation(filepath, G_target, G_pred, tf_mask=None, method=
         # Save regulatory relationship matrices
         if filepath is not None:
             np.savez(filepath, C=C, CU=CU)
-    assert np.all(CU >= C)
 
     # No self-regulation
     np.fill_diagonal(A, 0)
     np.fill_diagonal(C, 0)
     np.fill_diagonal(CU, 0)
+
+    assert np.all(CU >= C)
 
     # Categorise predictions based on local causal structures
     results = {'T': _evaluate(A, A_binary_pred, C, CU, tf_mask)}
