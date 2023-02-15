@@ -81,7 +81,7 @@ class GeneExpressionDataset:
 
         # Knock-out experiments
         S = np.zeros((self.n_genes, self.n_genes))
-        counts = np.zeros((self.n_genes, self.n_genes), dtype=np.int)
+        counts = np.zeros((self.n_genes, self.n_genes), dtype=int)
 
         # Compute statistics
         X = []

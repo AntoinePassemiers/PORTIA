@@ -154,12 +154,12 @@ def run(dataset, tf_idx=None, method='fast', lambda1=0.8, lambda2=0.05, n_iter=1
         idx = np.where(_P > theta)
         np.add.at(counts, idx[0], 1)
         np.add.at(counts, idx[1], 1)
-        weights = 1.0 / (1. + np.asarray(counts, dtype=np.float))
+        weights = 1.0 / (1. + np.asarray(counts, dtype=float))
     else:
         weights = np.ones(n_samples) / n_samples
 
     # Box-Cox transform
-    mask = np.asarray([(len(np.unique(_X[:, i])) > 1) for i in range(n_genes)], dtype=np.bool_)
+    mask = np.asarray([(len(np.unique(_X[:, i])) > 1) for i in range(n_genes)], dtype=bool)
     if method == Method.FAST:
         if np.sum(mask) > 0:
             power_transform = PowerTransformer(method='box-cox', standardize=True)
