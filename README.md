@@ -1,3 +1,4 @@
+[![PyPI](https://img.shields.io/pypi/v/portia-grn?logo=PyPI)](https://pypi.org/project/portia-grn)
 [![Build status](https://github.com/AntoinePassemiers/PORTIA/actions/workflows/build.yml/badge.svg)](https://github.com/AntoinePassemiers/PORTIA/actions?query=build)
 [![Code analysis](https://github.com/AntoinePassemiers/PORTIA/actions/workflows/analysis.yml/badge.svg)](https://github.com/AntoinePassemiers/PORTIA/actions?query=analysis)
 
