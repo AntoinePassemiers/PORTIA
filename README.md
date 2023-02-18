@@ -1,12 +1,15 @@
 [![PyPI](https://img.shields.io/pypi/v/portia-grn?logo=PyPI)](https://pypi.org/project/portia-grn)
 [![Downloads](https://static.pepy.tech/badge/portia-grn)](https://pepy.tech/project/portia-grn)
-<!--- [![Docs](https://readthedocs.com/projects/portia-grn/badge/?version=latest)](https://portia.readthedocs.io) -->
 [![Build status](https://github.com/AntoinePassemiers/PORTIA/actions/workflows/build.yml/badge.svg)](https://github.com/AntoinePassemiers/PORTIA/actions?query=build)
 [![Code analysis](https://github.com/AntoinePassemiers/PORTIA/actions/workflows/analysis.yml/badge.svg)](https://github.com/AntoinePassemiers/PORTIA/actions?query=analysis)
+<!--- [![Docs](https://readthedocs.com/projects/portia-grn/badge/?version=latest)](https://portia.readthedocs.io) -->
 
 # PORTIA
 
 <img align="left" src="docs/imgs/portia.svg" />
+
+Official source code for the paper "Fast and accurate inference of gene regulatory networks through robust precision matrix estimation", by Passemiers et al.
+https://academic.oup.com/bioinformatics/article/38/10/2802/6553011
 
 Lightning-fast Gene Regulatory Network (GRN) inference tool.
 This repository also hosts our graph-theoretical Normalised Discounted Cumulative Gain (gtNDCG) score metric for evaluating inferred GRNs. Usage of both PORTIA and gtNDCG is explained below.
