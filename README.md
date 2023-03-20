@@ -23,7 +23,7 @@ PORTIA builds on power transforms and covariance matrix inversion to approximate
 Install the dependencies:
 
 ```bash
-pip3 -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 For using the end-to-end inference algorithm, install dependencies from `requirements-etel.txt` instead.
